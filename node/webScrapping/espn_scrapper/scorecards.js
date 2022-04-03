@@ -14,6 +14,9 @@ function getInfoFromScorecard(url) {
 function cb(err,res,body) {
     if (err) {
         console.log(err);
+    } 
+    else if (res.statusCode == 404) {
+      console.log("Page not found");
     }
     else {
         getMatchDetails(body);
@@ -52,14 +55,22 @@ function getMatchDetails(html) {
   //5. get innings 
 
   let allBatsmenTable = selecTool(".table.batsman tbody");
-  console.log("number of batsmen tables are ->   ",allBatsmenTable.length);
-  let htmlString = "";
-  let count = 0;
+  // console.log("number of batsmen tables are ->   ",allBatsmenTable.length);
+  // let htmlString = "";
+  // let count = 0;
   for (let i = 0; i < allBatsmenTable.length; i++) {
-    htmlString = htmlString + selecTool(allBatsmenTable[i]).html();
+    // htmlString = htmlString + selecTool(allBatsmenTable[i]).html();
     //Get the descendants(table rows ) of each element (table )
     let allRows = selecTool(allBatsmenTable[i]).find("tr"); // -> data of batsmen + empty rows 
     
+    if (i == 1) {
+      let temp = ownTeam;
+      ownTeam = opponentTeam;
+      opponentTeam = temp;
+    }
+    console.log(ownTeam);
+    console.log(opponentTeam);
+
     for (let i = 0; i < allRows.length; i++) {
       //Check to see if any of the matched elements have the given className
       let row = selecTool(allRows[i]);
@@ -75,8 +86,17 @@ function getMatchDetails(html) {
         //     console.log(selecTool(row.find("td")[i]).text());
         //   }
         // }
-        let playerName = selecTool(row.find("td")[0]).text().trim();
+        let pn = selecTool(row.find("td")[0]).text().trim();
         // console.log(playerName);
+        let playerName="";
+        if (pn.includes("(")) {
+          playerName = pn.join("").split("(")[0];
+          // console.log(playerName);
+        } else if (pn.includes("†")) {
+          playerName = pn.join("").split("†")[0];
+          // console.log(playerName);
+        } else playerName = pn.join("");
+        //playerName = "hello"; //†
         let runs = selecTool(row.find("td")[2]).text();
         let balls = selecTool(row.find("td")[3]).text();
         let numberOf4 = selecTool(row.find("td")[5]).text();
@@ -100,6 +120,7 @@ function getMatchDetails(html) {
           numberOf6,
           sr
         );
+        console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
       }
     }
   }
